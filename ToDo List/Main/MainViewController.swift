@@ -75,6 +75,7 @@ class MainViewController: UIViewController, MainViewProtocol {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         tableView.backgroundColor = .clear
+        //tableView.separatorStyle = .singleLine
     }
     
     func addToolBarItems() {
@@ -90,8 +91,15 @@ class MainViewController: UIViewController, MainViewProtocol {
             target: nil,
             action: nil
         )
+        var countOfTaskslabel = UILabel()
+        countOfTaskslabel.textColor = .white
+        countOfTaskslabel.textAlignment = .center
+        countOfTaskslabel.font = .systemFont(ofSize: 11, weight: .light)
+        countOfTaskslabel.text = "15 Задач"
         
-        toolbarItems = [spacer, writeToDoButton]
+        var toolbarTitle = UIBarButtonItem(customView: countOfTaskslabel)
+        
+        toolbarItems = [spacer, toolbarTitle, spacer, writeToDoButton]
         navigationController?.isToolbarHidden = false
         navigationController?.toolbar.isTranslucent = false
         navigationController?.toolbar.barStyle = .default
@@ -108,7 +116,7 @@ extension MainViewController: UISearchBarDelegate {}
 extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        40
+        15
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -122,5 +130,10 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         
         return cell
     }
-
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "TaskView") as? TaskViewController {
+            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
 }
