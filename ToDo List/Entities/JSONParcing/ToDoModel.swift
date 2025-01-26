@@ -7,6 +7,6 @@
 
 
 struct ToDoModel: Codable {
-    var toDo: String
+    var todo: String
     var completed: Bool
 }

@@ -9,39 +9,17 @@ import UIKit
 
 class TableViewCell: UITableViewCell {
     
-    var checkMarkButton: UIButton = {
-        $0.translatesAutoresizingMaskIntoConstraints = false
-        $0.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        $0.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        $0.setImage(UIImage(systemName: "checkmark.circle"), for: .normal)
-        $0.tintColor = .yellow
-        return $0
-    }(UIButton())
-    
-    var titleLabel: UILabel = {
-        $0.translatesAutoresizingMaskIntoConstraints = false
-        $0.font = .systemFont(ofSize: 16, weight: .bold)
-        $0.text = "Test String"
-        $0.textColor = .white
-        return $0
-    }(UILabel())
-    
-    var descriptionLabel: UILabel = {
-        $0.translatesAutoresizingMaskIntoConstraints = false
-        $0.font = .systemFont(ofSize: 12, weight: .light)
-        $0.textColor = .white
-        $0.text = "Test description"
-        $0.numberOfLines = 0
-        return $0
-    }(UILabel())
-    
-    var dateLabel: UILabel = {
-        $0.translatesAutoresizingMaskIntoConstraints = false
-        $0.font = .systemFont(ofSize: 12, weight: .light)
-        $0.textColor = .gray
-        $0.text = "02/10/24"
-        return $0
-    }(UILabel())
+    var taskDone = false {
+        didSet {
+            changeCheckmarkButtonImage()
+        }
+    }
+    var numberOfTask: Int!
+
+    var checkMarkButton: UIButton!
+    var titleLabel: UILabel!
+    var descriptionLabel: UILabel!
+    var dateLabel: UILabel!
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -54,7 +32,49 @@ class TableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        if !taskDone {
+            super.prepareForReuse()
+        }
+    }
+    
     private func coinfigureSubviews() {
+        
+        checkMarkButton = {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.widthAnchor.constraint(equalToConstant: 24).isActive = true
+            $0.heightAnchor.constraint(equalToConstant: 24).isActive = true
+            $0.setImage(UIImage(systemName: "circle"), for: .normal)
+            $0.tintColor = .systemGray
+            $0.addTarget(self, action: #selector(pressCheckMarkButton), for: .touchUpInside)
+            return $0
+        }(UIButton())
+        
+        titleLabel = {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.font = .systemFont(ofSize: 16, weight: .bold)
+            $0.text = "Title"
+            $0.textColor = .white
+            return $0
+        }(UILabel())
+        
+        descriptionLabel = {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.font = .systemFont(ofSize: 12, weight: .light)
+            $0.textColor = .white
+            $0.text = "Description"
+            $0.numberOfLines = 0
+            return $0
+        }(UILabel())
+        
+        dateLabel = {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.font = .systemFont(ofSize: 12, weight: .light)
+            $0.textColor = .gray
+            $0.text = "02/10/24"
+            return $0
+        }(UILabel())
+        
         contentView.addSubview(checkMarkButton)
         contentView.addSubview(titleLabel)
         contentView.addSubview(descriptionLabel)
@@ -79,6 +99,62 @@ class TableViewCell: UITableViewCell {
             dateLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 6),
             dateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
         ])
+    }
+    
+    @objc func pressCheckMarkButton(sender: UIButton!) {
+        taskDone = !taskDone
+        firstToDos[numberOfTask].completed = taskDone
+        changeCheckmarkButtonImage()
+    }
+    
+    private func changeCheckmarkButtonImage() {
+        if taskDone {
+            self.checkMarkButton.setImage(
+                UIImage(systemName: "checkmark.circle"),
+                for: .normal
+            )
+            self.checkMarkButton.tintColor = .systemYellow
+            crossTitleText()
+        } else {
+            self.checkMarkButton.setImage(
+                UIImage(systemName: "circle"),
+                for: .normal
+            )
+            self.checkMarkButton.tintColor = .systemGray
+            cancelCrossTitleText()
+        }
+    }
+    
+    private func crossTitleText() {
+        guard let titleText = titleLabel.text else { return }
+        let attributedString = NSMutableAttributedString(string: titleText)
+        attributedString.addAttribute(
+            NSAttributedString.Key.strikethroughStyle,
+            value: NSUnderlineStyle.single.rawValue,
+            range: NSRange(location: 0, length: attributedString.length)
+        )
+        attributedString.addAttribute(
+            .foregroundColor,
+            value: UIColor.systemGray,
+            range: NSRange(location: 0, length: attributedString.length)
+        )
+        titleLabel.attributedText = attributedString
+    }
+    
+    private func cancelCrossTitleText() {
+        guard let titleText = titleLabel.text else { return }
+        let attrbutedString = NSMutableAttributedString(string: titleText)
+        attrbutedString.addAttribute(
+            .strikethroughStyle,
+            value: NSNumber(value: 0),
+            range: NSRange(location: 0, length: attrbutedString.length)
+        )
+        attrbutedString.addAttribute(
+            .foregroundColor,
+            value: UIColor.white,
+            range: NSRange(location: 0, length: attrbutedString.length)
+        )
+        titleLabel.attributedText = attrbutedString
     }
 
 }

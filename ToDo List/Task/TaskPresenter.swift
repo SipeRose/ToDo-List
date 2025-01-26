@@ -24,5 +24,6 @@ class TaskPresenter: TaskPresenterProtocol {
         taskView.makeBackButtonColor()
         taskView.addTitle()
         taskView.addDateLabel()
+        taskView.addTextField()
     }
 }

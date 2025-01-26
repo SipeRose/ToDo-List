@@ -8,11 +8,14 @@
 import UIKit
 
 protocol MainViewProtocol: AnyObject {
+    
+    var tableView: UITableView! { get set }
+    
     func addTitle()
     func addBackground()
     func addSearchBar()
     func addTableView()
-    func addToolBarItems()
+    func addToolBarItems(with countOfTasks: Int)
 }
 
 class MainViewController: UIViewController, MainViewProtocol {
@@ -56,6 +59,7 @@ class MainViewController: UIViewController, MainViewProtocol {
         
         searchBar.barTintColor = .black
         searchBar.barStyle = .black
+        searchBar.searchTextField.textColor = .white
         searchBar.placeholder = "Search"
         
     }
@@ -75,10 +79,9 @@ class MainViewController: UIViewController, MainViewProtocol {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         tableView.backgroundColor = .clear
-        //tableView.separatorStyle = .singleLine
     }
     
-    func addToolBarItems() {
+    func addToolBarItems(with countOfTasks: Int = 0) {
         let writeToDoButton = UIBarButtonItem(
             image: UIImage(systemName: "square.and.pencil"),
             style: .plain,
@@ -91,13 +94,13 @@ class MainViewController: UIViewController, MainViewProtocol {
             target: nil,
             action: nil
         )
-        var countOfTaskslabel = UILabel()
+        let countOfTaskslabel = UILabel()
         countOfTaskslabel.textColor = .white
         countOfTaskslabel.textAlignment = .center
         countOfTaskslabel.font = .systemFont(ofSize: 11, weight: .light)
-        countOfTaskslabel.text = "15 Задач"
+        countOfTaskslabel.text = "\(countOfTasks) Задач"
         
-        var toolbarTitle = UIBarButtonItem(customView: countOfTaskslabel)
+        let toolbarTitle = UIBarButtonItem(customView: countOfTaskslabel)
         
         toolbarItems = [spacer, toolbarTitle, spacer, writeToDoButton]
         navigationController?.isToolbarHidden = false
@@ -111,12 +114,25 @@ class MainViewController: UIViewController, MainViewProtocol {
     
 }
 
-extension MainViewController: UISearchBarDelegate {}
+
+extension MainViewController: UISearchBarDelegate {
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        firstToDos = firstToDosCopy
+        
+        if !searchText.isEmpty {
+            firstToDos = firstToDosCopy.filter { $0.todo.contains(searchText) }
+        }
+        
+        tableView.reloadData()
+    }
+
+}
 
 extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        15
+        firstToDos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -125,8 +141,12 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             withIdentifier: "ToDoCell",
             for: indexPath
         ) as? TableViewCell else {
-            fatalError("")
+            fatalError("Error while making such cell")
         }
+
+        cell.titleLabel.text = firstToDos[indexPath.row].todo
+        cell.taskDone = firstToDos[indexPath.row].completed
+        cell.numberOfTask = indexPath.row
         
         return cell
     }

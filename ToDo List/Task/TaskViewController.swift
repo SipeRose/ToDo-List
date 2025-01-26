@@ -12,11 +12,13 @@ protocol TaskViewProtocol: AnyObject {
     func makeBackButtonColor()
     func addTitle()
     func addDateLabel()
+    func addTextField()
 }
 
 class TaskViewController: UIViewController, TaskViewProtocol {
     
     var dateLabel: UILabel!
+    var textField: UITextField!
     
     var presenter: TaskPresenterProtocol!
     var configurator: TaskConfiguratorProtocol = TaskConfigurator()
@@ -56,6 +58,22 @@ class TaskViewController: UIViewController, TaskViewProtocol {
             dateLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             dateLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
+    }
+    
+    func addTextField() {
+        textField = UITextField()
+        view.addSubview(textField)
+        
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
+            textField.leadingAnchor.constraint(equalTo: dateLabel.leadingAnchor),
+            textField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            textField.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+        
+        textField.textColor = .white
+        textField.contentVerticalAlignment = .fill
     }
 
 }
