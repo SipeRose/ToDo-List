@@ -12,13 +12,16 @@ protocol TaskViewProtocol: AnyObject {
     func makeBackButtonColor()
     func addTitle()
     func addDateLabel()
-    func addTextField()
+    func addTextView()
 }
 
 class TaskViewController: UIViewController, TaskViewProtocol {
     
     var dateLabel: UILabel!
-    var textField: UITextField!
+    var textView: UITextView!
+    var taskId: String!
+    var date: String!
+    var taskDescription: String!
     
     var presenter: TaskPresenterProtocol!
     var configurator: TaskConfiguratorProtocol = TaskConfigurator()
@@ -38,7 +41,6 @@ class TaskViewController: UIViewController, TaskViewProtocol {
     }
     
     func addTitle() {
-        title = "Тестовый заголовок"
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [
             NSAttributedString.Key.foregroundColor: UIColor.white
@@ -47,9 +49,13 @@ class TaskViewController: UIViewController, TaskViewProtocol {
     
     func addDateLabel() {
         dateLabel = UILabel()
-        dateLabel.text = "12/09/24"
+        if let date = date {
+            dateLabel.text = date
+        } else {
+            dateLabel.text = "12/09/24"
+        }
         dateLabel.textColor = .gray
-        dateLabel.font = .systemFont(ofSize: 12, weight: .light)
+        dateLabel.font = .systemFont(ofSize: 14, weight: .light)
         
         view.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -60,20 +66,22 @@ class TaskViewController: UIViewController, TaskViewProtocol {
         ])
     }
     
-    func addTextField() {
-        textField = UITextField()
-        view.addSubview(textField)
+    func addTextView() {
+        textView = UITextView()
+        view.addSubview(textView)
         
-        textField.translatesAutoresizingMaskIntoConstraints = false
+        textView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
-            textField.leadingAnchor.constraint(equalTo: dateLabel.leadingAnchor),
-            textField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            textField.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            textView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
+            textView.leadingAnchor.constraint(equalTo: dateLabel.leadingAnchor),
+            textView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            textView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
-        textField.textColor = .white
-        textField.contentVerticalAlignment = .fill
+        textView.textColor = .white
+        textView.backgroundColor = .clear
+        textView.font = .systemFont(ofSize: 17, weight: .regular)
+        textView.text = taskDescription
     }
 
 }

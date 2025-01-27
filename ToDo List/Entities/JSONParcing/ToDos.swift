@@ -6,9 +6,9 @@
 //
 
 struct ToDos: Codable {
-    var todos: [ToDoModel]
+    var todos: [ToDoJSONModel]
 }
 
 
-var firstToDos = [ToDoModel]()
-var firstToDosCopy = [ToDoModel]()
+var currentToDos = [ToDoModel]()
+var currentToDosCopy = [ToDoModel]()

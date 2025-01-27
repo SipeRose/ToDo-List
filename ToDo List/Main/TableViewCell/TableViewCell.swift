@@ -14,7 +14,8 @@ class TableViewCell: UITableViewCell {
             changeCheckmarkButtonImage()
         }
     }
-    var numberOfTask: Int!
+    var id: String!
+    weak var ownerTableView: UITableView!
 
     var checkMarkButton: UIButton!
     var titleLabel: UILabel!
@@ -37,8 +38,109 @@ class TableViewCell: UITableViewCell {
             super.prepareForReuse()
         }
     }
+
+}
+
+
+// MARK: Checkmark Methods
+extension TableViewCell {
     
-    private func coinfigureSubviews() {
+    @objc fileprivate func pressCheckMarkButton(sender: UIButton!) {
+        taskDone = !taskDone
+        changeCheckmarkButtonImage()
+        
+        for (index, toDo) in currentToDos.enumerated() {
+            if toDo.id == id {
+                currentToDos[index].completed = taskDone
+                break
+            }
+        }
+        
+        for (index, toDo) in currentToDosCopy.enumerated() {
+            if toDo.id == id {
+                currentToDosCopy[index].completed = taskDone
+                break
+            }
+        }
+
+        ownerTableView.reloadData()
+    }
+    
+    fileprivate func changeCheckmarkButtonImage() {
+        
+        if taskDone {
+            self.checkMarkButton.setImage(
+                UIImage(systemName: "checkmark.circle"),
+                for: .normal
+            )
+            self.checkMarkButton.tintColor = .systemYellow
+            crossTitleAndDescriptionText()
+        } else {
+            self.checkMarkButton.setImage(
+                UIImage(systemName: "circle"),
+                for: .normal
+            )
+            self.checkMarkButton.tintColor = .systemGray
+            cancelCrossTitleText()
+        }
+    }
+    
+    private func crossTitleAndDescriptionText() {
+        guard let titleText = titleLabel.text else { return }
+        var attributedString = NSMutableAttributedString(string: titleText)
+        attributedString.addAttribute(
+            NSAttributedString.Key.strikethroughStyle,
+            value: NSUnderlineStyle.single.rawValue,
+            range: NSRange(location: 0, length: attributedString.length)
+        )
+        attributedString.addAttribute(
+            .foregroundColor,
+            value: UIColor.systemGray,
+            range: NSRange(location: 0, length: attributedString.length)
+        )
+        titleLabel.attributedText = attributedString
+        
+        guard let descriptionText = descriptionLabel.text else { return }
+        attributedString = NSMutableAttributedString(string: descriptionText)
+        attributedString.addAttribute(
+            .foregroundColor,
+            value: UIColor.systemGray,
+            range: NSRange(location: 0, length: attributedString.length)
+        )
+        descriptionLabel.attributedText = attributedString
+    }
+    
+    private func cancelCrossTitleText() {
+        guard let titleText = titleLabel.text else { return }
+        var attrbutedString = NSMutableAttributedString(string: titleText)
+        attrbutedString.addAttribute(
+            .strikethroughStyle,
+            value: NSNumber(value: 0),
+            range: NSRange(location: 0, length: attrbutedString.length)
+        )
+        attrbutedString.addAttribute(
+            .foregroundColor,
+            value: UIColor.white,
+            range: NSRange(location: 0, length: attrbutedString.length)
+        )
+        titleLabel.attributedText = attrbutedString
+        
+        guard let descriptionText = descriptionLabel.text else { return }
+        attrbutedString = NSMutableAttributedString(string: descriptionText)
+        attrbutedString.addAttribute(
+            .foregroundColor,
+            value: UIColor.white,
+            range: NSRange(location: 0, length: attrbutedString.length)
+        )
+        descriptionLabel.attributedText = attrbutedString
+    }
+    
+}
+
+// MARK: Cell's UI
+extension TableViewCell {
+    
+    fileprivate func coinfigureSubviews() {
         
         checkMarkButton = {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -62,8 +164,8 @@ class TableViewCell: UITableViewCell {
             $0.translatesAutoresizingMaskIntoConstraints = false
             $0.font = .systemFont(ofSize: 12, weight: .light)
             $0.textColor = .white
-            $0.text = "Description"
-            $0.numberOfLines = 0
+            $0.text = ""
+            $0.numberOfLines = 2
             return $0
         }(UILabel())
         
@@ -81,7 +183,14 @@ class TableViewCell: UITableViewCell {
         contentView.addSubview(dateLabel)
     }
     
-    private func configureConstraints() {
+}
+
+
+// MARK: Layout
+
+extension TableViewCell {
+    
+    fileprivate func configureConstraints() {
         NSLayoutConstraint.activate([
             checkMarkButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             checkMarkButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
@@ -101,60 +210,4 @@ class TableViewCell: UITableViewCell {
         ])
     }
     
-    @objc func pressCheckMarkButton(sender: UIButton!) {
-        taskDone = !taskDone
-        firstToDos[numberOfTask].completed = taskDone
-        changeCheckmarkButtonImage()
-    }
-    
-    private func changeCheckmarkButtonImage() {
-        if taskDone {
-            self.checkMarkButton.setImage(
-                UIImage(systemName: "checkmark.circle"),
-                for: .normal
-            )
-            self.checkMarkButton.tintColor = .systemYellow
-            crossTitleText()
-        } else {
-            self.checkMarkButton.setImage(
-                UIImage(systemName: "circle"),
-                for: .normal
-            )
-            self.checkMarkButton.tintColor = .systemGray
-            cancelCrossTitleText()
-        }
-    }
-    
-    private func crossTitleText() {
-        guard let titleText = titleLabel.text else { return }
-        let attributedString = NSMutableAttributedString(string: titleText)
-        attributedString.addAttribute(
-            NSAttributedString.Key.strikethroughStyle,
-            value: NSUnderlineStyle.single.rawValue,
-            range: NSRange(location: 0, length: attributedString.length)
-        )
-        attributedString.addAttribute(
-            .foregroundColor,
-            value: UIColor.systemGray,
-            range: NSRange(location: 0, length: attributedString.length)
-        )
-        titleLabel.attributedText = attributedString
-    }
-    
-    private func cancelCrossTitleText() {
-        guard let titleText = titleLabel.text else { return }
-        let attrbutedString = NSMutableAttributedString(string: titleText)
-        attrbutedString.addAttribute(
-            .strikethroughStyle,
-            value: NSNumber(value: 0),
-            range: NSRange(location: 0, length: attrbutedString.length)
-        )
-        attrbutedString.addAttribute(
-            .foregroundColor,
-            value: UIColor.white,
-            range: NSRange(location: 0, length: attrbutedString.length)
-        )
-        titleLabel.attributedText = attrbutedString
-    }
-
 }

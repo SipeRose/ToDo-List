@@ -15,16 +15,15 @@ protocol MainViewProtocol: AnyObject {
     func addBackground()
     func addSearchBar()
     func addTableView()
-    func addToolBarItems(with countOfTasks: Int)
 }
 
 class MainViewController: UIViewController, MainViewProtocol {
     
-    var searchBar: UISearchBar!
-    var tableView: UITableView!
-    
     var presenter: MainPresenterProtocol!
     var configurator: MainConfiguratorProtocol = MainConfigurator()
+    
+    var searchBar: UISearchBar!
+    var tableView: UITableView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -81,50 +80,24 @@ class MainViewController: UIViewController, MainViewProtocol {
         tableView.backgroundColor = .clear
     }
     
-    func addToolBarItems(with countOfTasks: Int = 0) {
-        let writeToDoButton = UIBarButtonItem(
-            image: UIImage(systemName: "square.and.pencil"),
-            style: .plain,
-            target: self,
-            action: #selector(writeToDo)
-        )
-        writeToDoButton.tintColor = .systemYellow
-        let spacer = UIBarButtonItem(
-            barButtonSystemItem: .flexibleSpace,
-            target: nil,
-            action: nil
-        )
-        let countOfTaskslabel = UILabel()
-        countOfTaskslabel.textColor = .white
-        countOfTaskslabel.textAlignment = .center
-        countOfTaskslabel.font = .systemFont(ofSize: 11, weight: .light)
-        countOfTaskslabel.text = "\(countOfTasks) Задач"
-        
-        let toolbarTitle = UIBarButtonItem(customView: countOfTaskslabel)
-        
-        toolbarItems = [spacer, toolbarTitle, spacer, writeToDoButton]
-        navigationController?.isToolbarHidden = false
-        navigationController?.toolbar.isTranslucent = false
-        navigationController?.toolbar.barStyle = .default
-    }
-    
-    @objc func writeToDo() {
-        
-    }
-    
 }
 
 
 extension MainViewController: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        firstToDos = firstToDosCopy
         
-        if !searchText.isEmpty {
-            firstToDos = firstToDosCopy.filter { $0.todo.contains(searchText) }
+        DispatchQueue.global(qos: .userInitiated).async {
+            currentToDos = currentToDosCopy
+            
+            if !searchText.isEmpty {
+                currentToDos = currentToDosCopy.filter { $0.todo.contains(searchText) }
+            }
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
+            }
         }
-        
-        tableView.reloadData()
     }
 
 }
@@ -132,7 +105,7 @@ extension MainViewController: UISearchBarDelegate {
 extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        firstToDos.count
+        currentToDos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -143,17 +116,60 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         ) as? TableViewCell else {
             fatalError("Error while making such cell")
         }
+        
+        cell.selectionStyle = .none
 
-        cell.titleLabel.text = firstToDos[indexPath.row].todo
-        cell.taskDone = firstToDos[indexPath.row].completed
-        cell.numberOfTask = indexPath.row
+        cell.titleLabel.text = currentToDos[indexPath.row].todo
+        cell.descriptionLabel.text = currentToDos[indexPath.row].taskDescription
+        cell.taskDone = currentToDos[indexPath.row].completed
+        cell.id = currentToDos[indexPath.row].id
+        cell.dateLabel.text = currentToDos[indexPath.row].date
+        cell.ownerTableView = tableView
         
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if let vc = storyboard?.instantiateViewController(withIdentifier: "TaskView") as? TaskViewController {
-            navigationController?.pushViewController(vc, animated: true)
-        }
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(
+            identifier: nil,
+            previewProvider: nil,
+            actionProvider: { suggestedActions in
+                
+                let edit = UIAction(
+                    title: "Редактировать",
+                    image: UIImage(systemName: "square.and.pencil"),
+                    handler: { _ in
+                        let task = currentToDos[indexPath.row]
+                        self.presenter.openTaskView(with: task)
+                    }
+                )
+                
+                let share = UIAction(
+                    title: "Поделиться",
+                    image: UIImage(systemName: "square.and.arrow.up"),
+                    handler: { _ in
+                        let task = currentToDos[indexPath.row]
+                        self.presenter.shareTheTask(task: task)
+                    }
+                )
+                
+                let delete = UIAction(
+                    title: "Удалить",
+                    image: UIImage(systemName: "trash"),
+                    attributes: .destructive,
+                    handler: { _ in
+                        guard let cell = tableView.cellForRow(at: indexPath) as? TableViewCell else { return }
+                        if let id = cell.id {
+                            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                                self?.presenter.deleteTheTask(at: indexPath, id: id)
+                            }
+                        }
+                    }
+                )
+                
+                return UIMenu(title: "", children: [edit, share, delete])
+            }
+        )
     }
+    
 }

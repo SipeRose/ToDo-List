@@ -7,7 +7,7 @@
 
 
 protocol MainRouterProtocol {
-    
+    func openTheTaskView(with task: ToDoModel)
 }
 
 class MainRouter: MainRouterProtocol {
@@ -16,6 +16,16 @@ class MainRouter: MainRouterProtocol {
     
     init(viewController: MainViewController) {
         self.viewController = viewController
+    }
+    
+    func openTheTaskView(with task: ToDoModel) {
+        if let vc = viewController.storyboard?.instantiateViewController(withIdentifier: "TaskView") as? TaskViewController {
+            vc.navigationItem.title = task.todo
+            vc.date = task.date
+            vc.taskId = task.id
+            vc.taskDescription = task.taskDescription
+            viewController.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
 }
