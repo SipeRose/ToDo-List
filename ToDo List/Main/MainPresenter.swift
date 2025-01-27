@@ -14,7 +14,7 @@ protocol MainPresenterProtocol: AnyObject {
     func reloadTableViewData()
     func updateTasksCount(to count: Int)
     func insertNewRowToTableView()
-    func openTaskView(with task: ToDoDataItem)
+    func openTaskView(with task: ToDoDataItem, from cell: TableViewCell)
     func deleteTheTask(at indexPath: IndexPath, toDoItem: ToDoDataItem)
     func shareTheTask(task: ToDoDataItem)
 }
@@ -113,10 +113,16 @@ class MainPresenter: MainPresenterProtocol {
                     guard let description = alertController.textFields?.last?.text else { return }
                         
                     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                        self?.interactor.addNemTask(title: title, description: description)
-                        DispatchQueue.main.async {
+                        
+                        self?.interactor.addNemTask(
+                            title: title,
+                            description: description
+                        )
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             self?.updateTasksCount(to: currentToDos.count)
                         }
+                        
                     }
                 }
             )
@@ -130,8 +136,8 @@ class MainPresenter: MainPresenterProtocol {
         viewController.present(alertController, animated: true)
     }
     
-    func openTaskView(with task: ToDoDataItem) {
-        self.router.openTheTaskView(with: task)
+    func openTaskView(with task: ToDoDataItem, from cell: TableViewCell) {
+        self.router.openTheTaskView(with: task, from: cell)
     }
     
     func deleteRow(at indexPath: IndexPath) {

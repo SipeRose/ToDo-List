@@ -5,6 +5,7 @@
 //  Created by Никита Волков on 24.01.2025.
 //
 
+import Dispatch
 
 protocol MainConfiguratorProtocol {
     func configure(with viewController: MainViewController)
@@ -22,7 +23,14 @@ class MainConfigurator: MainConfiguratorProtocol {
         presenter.router = router
         
         Task {
-            try await presenter.interactor.parseJSON()
+            if checkFirstParse() == nil {
+                try await interactor.parseJSON()
+            } else {
+                interactor.getAllDataFromCoreData()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    presenter.updateTasksCount(to: currentToDos.count)
+                }
+            }
         }
         
     }

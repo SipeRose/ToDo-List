@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 protocol TaskViewProtocol: AnyObject {
     func addBackground()
@@ -21,6 +22,9 @@ class TaskViewController: UIViewController, TaskViewProtocol {
     var textView: UITextView!
     var date: String!
     var taskDescription: String!
+    var context: NSManagedObjectContext!
+    var toDoItem: ToDoDataItem!
+    var initialCell: TableViewCell!
     
     var presenter: TaskPresenterProtocol!
     var configurator: TaskConfiguratorProtocol = TaskConfigurator()
@@ -29,6 +33,47 @@ class TaskViewController: UIViewController, TaskViewProtocol {
         super.viewDidLoad()
         configurator.configure(with: self)
         presenter.configureView()
+        
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(saveBeforeExit),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        let taskDescription = textView.text ?? ""
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.saveTextViewText(taskDescription)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.updateTableViewCellDescriptionLabelText(to: taskDescription)
+        }
+    }
+    
+    @objc private func saveBeforeExit() {
+        saveTextViewText(textView.text ?? "")
+        print(555)
+    }
+    
+    private func saveTextViewText(_ taskDescription: String) {
+        guard let presenter = presenter as? TaskPresenter else { return }
+        
+        presenter.interactor.saveToDoChanges(
+            taskDescription: taskDescription,
+            context: context,
+            toDoItem: toDoItem
+        )
+        
+    }
+    
+    private func updateTableViewCellDescriptionLabelText(to description: String) {
+        initialCell.descriptionLabel.text = description
     }
     
     func addBackground() {

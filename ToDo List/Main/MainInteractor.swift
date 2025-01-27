@@ -49,7 +49,7 @@ class MainInteractor: MainInteractorProtocol {
                 let description = ""
                 let completed = todo.completed
                 
-                createNewToDoData(
+                _ = createNewToDoData(
                     date: "02/10/24",
                     todo: title,
                     taskDescription: description,
@@ -57,6 +57,8 @@ class MainInteractor: MainInteractorProtocol {
                 )
                 
             }
+            
+            saveFirstParse()
             
             DispatchQueue.main.async { [weak self] in
                 self?.presenter.reloadTableViewData()
@@ -85,8 +87,8 @@ class MainInteractor: MainInteractorProtocol {
         currentToDos.insert(newTask, at: 0)
         currentToDosCopy = currentToDos
         
-        DispatchQueue.main.async { [weak self] in
-            self?.presenter.insertNewRowToTableView()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.presenter.insertNewRowToTableView()
         }
     }
     
@@ -100,13 +102,15 @@ class MainInteractor: MainInteractorProtocol {
     // MARK: Core Data
     
     func getAllDataFromCoreData() {
-        do {
-            if let toDoData = try context?.fetch(ToDoDataItem.fetchRequest()) {
-                currentToDos = toDoData
-                currentToDosCopy = currentToDos
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                if let toDoData = try self.context?.fetch(ToDoDataItem.fetchRequest()) {
+                    currentToDos = toDoData.reversed()
+                    currentToDosCopy = currentToDos
+                }
+            } catch {
+                
             }
-        } catch {
-            
         }
     }
     
@@ -135,7 +139,6 @@ class MainInteractor: MainInteractorProtocol {
         
         do {
             try context.save()
-            //getAllDataFromCoreData()
         } catch {
             print("Не удалось сохранить")
         }
@@ -155,7 +158,6 @@ class MainInteractor: MainInteractorProtocol {
         
         do {
             try context.save()
-            // getAllDataFromCoreData()
         } catch {
             
         }

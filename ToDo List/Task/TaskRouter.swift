@@ -5,10 +5,6 @@
 //  Created by Никита Волков on 24.01.2025.
 //
 
-protocol TaskRouterProtocol {
-    
-}
+protocol TaskRouterProtocol {}
 
-class TaskRouter: TaskRouterProtocol {
-    
-}
+class TaskRouter: TaskRouterProtocol {}

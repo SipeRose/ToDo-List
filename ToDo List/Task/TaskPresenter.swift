@@ -8,8 +8,9 @@
 import UIKit
 import NotificationCenter
 
-protocol TaskPresenterProtocol {
+protocol TaskPresenterProtocol: AnyObject {
     var router: TaskRouterProtocol! { get set }
+    var interactor: TaskInteractor! { get set }
     func configureView()
 }
 
@@ -17,6 +18,7 @@ class TaskPresenter: TaskPresenterProtocol {
     
     weak var taskView: TaskViewProtocol!
     var router: TaskRouterProtocol!
+    var interactor: TaskInteractor!
     
     required init(view: TaskViewController) {
         self.taskView = view

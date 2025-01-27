@@ -14,10 +14,10 @@ final class TaskConfigurator: TaskConfiguratorProtocol {
     
     func configure(with taskViewController: TaskViewController) {
         let presenter = TaskPresenter(view: taskViewController)
-        // let interactor = TaskInteractor()
-        // let router = TaskRouter()
+        let interactor = TaskInteractor(presenter: presenter)
         
         taskViewController.presenter = presenter
+        presenter.interactor = interactor
     }
     
 }

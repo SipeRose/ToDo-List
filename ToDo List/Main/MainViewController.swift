@@ -140,7 +140,10 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                     image: UIImage(systemName: "square.and.pencil"),
                     handler: { _ in
                         let task = currentToDos[indexPath.row]
-                        self.presenter.openTaskView(with: task)
+                        self.presenter.openTaskView(
+                            with: task,
+                            from: tableView.cellForRow(at: indexPath) as! TableViewCell
+                        )
                     }
                 )
                 
