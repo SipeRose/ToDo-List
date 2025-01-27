@@ -49,17 +49,14 @@ class MainInteractor: MainInteractorProtocol {
                 let description = ""
                 let completed = todo.completed
                 
-                let toDoWithDescription = createNewToDoData(
+                createNewToDoData(
                     date: "02/10/24",
                     todo: title,
                     taskDescription: description,
                     completed: completed
                 )
                 
-                currentToDos.append(toDoWithDescription)
             }
-            
-            currentToDosCopy = currentToDos
             
             DispatchQueue.main.async { [weak self] in
                 self?.presenter.reloadTableViewData()
@@ -126,7 +123,7 @@ class MainInteractor: MainInteractorProtocol {
             try context.save()
             getAllDataFromCoreData()
         } catch {
-            
+            print("Не удалось созранить ничего")
         }
         
         return newTask
@@ -138,9 +135,9 @@ class MainInteractor: MainInteractorProtocol {
         
         do {
             try context.save()
-            getAllDataFromCoreData()
+            //getAllDataFromCoreData()
         } catch {
-            
+            print("Не удалось сохранить")
         }
     }
     

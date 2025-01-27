@@ -140,11 +140,27 @@ class MainPresenter: MainPresenterProtocol {
     
     func deleteTheTask(at indexPath: IndexPath, toDoItem: ToDoDataItem) {
         
-        self.interactor.deleteToDoData(data: toDoItem)
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.interactor.deleteToDoData(data: toDoItem)
+            
+            for (index, item) in currentToDos.enumerated() {
+                if item == toDoItem {
+                    currentToDos.remove(at: index)
+                    break
+                }
+            }
+            
+            for (index, item) in currentToDosCopy.enumerated() {
+                if item == toDoItem {
+                    currentToDosCopy.remove(at: index)
+                    break
+                }
+            }
+        }
         
-        DispatchQueue.main.async { [weak self] in
-            self?.deleteRow(at: indexPath)
-            self?.updateTasksCount(to: currentToDosCopy.count)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            self.deleteRow(at: indexPath)
+            self.updateTasksCount(to: currentToDosCopy.count)
         }
     }
     

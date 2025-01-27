@@ -159,9 +159,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                     attributes: .destructive,
                     handler: { _ in
                         guard let cell = tableView.cellForRow(at: indexPath) as? TableViewCell else { return }
-                        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                            self?.presenter.deleteTheTask(at: indexPath, toDoItem: cell.toDoItem)
-                        }
+                        self.presenter.deleteTheTask(at: indexPath, toDoItem: cell.toDoItem)
                     }
                 )
                 
