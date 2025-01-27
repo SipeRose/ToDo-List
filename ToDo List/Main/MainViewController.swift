@@ -91,7 +91,7 @@ extension MainViewController: UISearchBarDelegate {
             currentToDos = currentToDosCopy
             
             if !searchText.isEmpty {
-                currentToDos = currentToDosCopy.filter { $0.todo.contains(searchText) }
+                currentToDos = currentToDosCopy.filter { $0.todo!.contains(searchText) }
             }
             
             DispatchQueue.main.async { [weak self] in
@@ -118,11 +118,11 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         cell.selectionStyle = .none
-
+        
+        cell.toDoItem = currentToDos[indexPath.row]
         cell.titleLabel.text = currentToDos[indexPath.row].todo
         cell.descriptionLabel.text = currentToDos[indexPath.row].taskDescription
         cell.taskDone = currentToDos[indexPath.row].completed
-        cell.id = currentToDos[indexPath.row].id
         cell.dateLabel.text = currentToDos[indexPath.row].date
         cell.ownerTableView = tableView
         
@@ -159,10 +159,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                     attributes: .destructive,
                     handler: { _ in
                         guard let cell = tableView.cellForRow(at: indexPath) as? TableViewCell else { return }
-                        if let id = cell.id {
-                            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                                self?.presenter.deleteTheTask(at: indexPath, id: id)
-                            }
+                        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                            self?.presenter.deleteTheTask(at: indexPath, toDoItem: cell.toDoItem)
                         }
                     }
                 )

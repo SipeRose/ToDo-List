@@ -11,17 +11,19 @@ import CoreData
 protocol MainInteractorProtocol {
     func parseJSON() async throws
     func addNemTask(title: String, description: String)
+    func deleteToDoData(data object: ToDoDataItem)
+    func updateToDoData(toDoItem: ToDoDataItem, completed: Bool?, taskDescription: String?)
 }
 
 
 class MainInteractor: MainInteractorProtocol {
     
     weak var presenter: MainPresenterProtocol!
-    //let context: NSManagedObjectContext?
+    let context: NSManagedObjectContext?
     
     required init(presenter: MainPresenterProtocol) {
         self.presenter = presenter
-        // context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext
+        context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext
     }
     
     func parseJSON() async throws {
@@ -42,27 +44,18 @@ class MainInteractor: MainInteractorProtocol {
             let result = try decoder.decode(ToDos.self, from: data)
             
             for todo in result.todos {
-                let id = String(todo.id)
+                
                 let title = todo.todo
                 let description = ""
                 let completed = todo.completed
                 
-                let toDoWithDescription = ToDoModel(
-                    id: id,
+                let toDoWithDescription = createNewToDoData(
                     date: "02/10/24",
                     todo: title,
                     taskDescription: description,
                     completed: completed
                 )
                 
-                /*
-                createNewToDoData(
-                    date: "02/10/24",
-                    todo: title,
-                    taskDescription: description,
-                    completed: completed
-                )
-                */
                 currentToDos.append(toDoWithDescription)
             }
             
@@ -79,28 +72,19 @@ class MainInteractor: MainInteractorProtocol {
     }
     
     func addNemTask(title: String, description: String) {
-        let id = UUID().uuidString
+
         let date = getStringDate()
         let taskTitle = title
         let taskDescription = description
         let completed = false
         
-        /*
-        createNewToDoData(
+        let newTask = createNewToDoData(
             date: date,
             todo: (taskTitle == "") ? "Без названия" : taskTitle,
             taskDescription: taskDescription,
             completed: completed
         )
-         */
-        
-        let newTask = ToDoModel(
-            id: id,
-            date: date,
-            todo: (taskTitle == "") ? "Без названия" : taskTitle,
-            taskDescription: taskDescription,
-            completed: completed
-        )
+
         currentToDos.insert(newTask, at: 0)
         currentToDosCopy = currentToDos
         
@@ -118,18 +102,21 @@ class MainInteractor: MainInteractorProtocol {
     
     // MARK: Core Data
     
-    /*
     func getAllDataFromCoreData() {
         do {
-            let toDoData = try context?.fetch(ToDoDataItem.fetchRequest())
+            if let toDoData = try context?.fetch(ToDoDataItem.fetchRequest()) {
+                currentToDos = toDoData
+                currentToDosCopy = currentToDos
+            }
         } catch {
             
         }
     }
     
-    func createNewToDoData(date: String, todo: String, taskDescription: String, completed: Bool) {
-        guard let context = context else { return }
+    func createNewToDoData(date: String, todo: String, taskDescription: String, completed: Bool) -> ToDoDataItem {
+        guard let context = context else { fatalError() }
         let newTask = ToDoDataItem(context: context)
+        
         newTask.date = date
         newTask.todo = todo
         newTask.taskDescription = taskDescription
@@ -141,6 +128,8 @@ class MainInteractor: MainInteractorProtocol {
         } catch {
             
         }
+        
+        return newTask
     }
     
     func deleteToDoData(data object: ToDoDataItem) {
@@ -155,15 +144,24 @@ class MainInteractor: MainInteractorProtocol {
         }
     }
     
-    func updateToDoData(data: ToDoData) {
+    func updateToDoData(toDoItem: ToDoDataItem, completed: Bool?, taskDescription: String?) {
+        
         guard let context = context else { return }
-        data.date = ""
+        
+        if let completed = completed {
+            toDoItem.completed = completed
+        }
+        
+        if let taskDescription = taskDescription {
+            toDoItem.taskDescription = taskDescription
+        }
+        
         do {
             try context.save()
-            getAllDataFromCoreData()
+            // getAllDataFromCoreData()
         } catch {
             
         }
     }
-     */
+
 }

@@ -11,11 +11,3 @@ struct ToDoJSONModel: Codable {
     var todo: String
     var completed: Bool
 }
-
-struct ToDoModel {
-    let id: String
-    let date: String
-    var todo: String
-    var taskDescription: String
-    var completed: Bool
-}

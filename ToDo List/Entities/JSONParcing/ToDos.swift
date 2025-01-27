@@ -10,5 +10,5 @@ struct ToDos: Codable {
 }
 
 
-var currentToDos = [ToDoModel]()
-var currentToDosCopy = [ToDoModel]()
+var currentToDos = [ToDoDataItem]()
+var currentToDosCopy = [ToDoDataItem]()

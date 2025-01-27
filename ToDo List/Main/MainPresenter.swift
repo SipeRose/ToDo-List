@@ -14,9 +14,9 @@ protocol MainPresenterProtocol: AnyObject {
     func reloadTableViewData()
     func updateTasksCount(to count: Int)
     func insertNewRowToTableView()
-    func openTaskView(with task: ToDoModel)
-    func deleteTheTask(at indexPath: IndexPath, id: String)
-    func shareTheTask(task: ToDoModel)
+    func openTaskView(with task: ToDoDataItem)
+    func deleteTheTask(at indexPath: IndexPath, toDoItem: ToDoDataItem)
+    func shareTheTask(task: ToDoDataItem)
 }
 
 class MainPresenter: MainPresenterProtocol {
@@ -130,7 +130,7 @@ class MainPresenter: MainPresenterProtocol {
         viewController.present(alertController, animated: true)
     }
     
-    func openTaskView(with task: ToDoModel) {
+    func openTaskView(with task: ToDoDataItem) {
         self.router.openTheTaskView(with: task)
     }
     
@@ -138,21 +138,9 @@ class MainPresenter: MainPresenterProtocol {
         view.tableView.deleteRows(at: [indexPath], with: .right)
     }
     
-    func deleteTheTask(at indexPath: IndexPath, id: String) {
+    func deleteTheTask(at indexPath: IndexPath, toDoItem: ToDoDataItem) {
         
-        for (index, toDo) in currentToDos.enumerated() {
-            if toDo.id == id {
-                currentToDos.remove(at: index)
-                break
-            }
-        }
-        
-        for (index, toDo) in currentToDosCopy.enumerated() {
-            if toDo.id == id {
-                currentToDosCopy.remove(at: index)
-                break
-            }
-        }
+        self.interactor.deleteToDoData(data: toDoItem)
         
         DispatchQueue.main.async { [weak self] in
             self?.deleteRow(at: indexPath)
@@ -160,17 +148,17 @@ class MainPresenter: MainPresenterProtocol {
         }
     }
     
-    func shareTheTask(task: ToDoModel) {
+    func shareTheTask(task: ToDoDataItem) {
         
         guard let viewController = view as? MainViewController else { return }
         
         let sharedTaskString = """
-            \(task.date)
+            \(task.date ?? "Дата неизвестна")
             
-            Задача: \(task.todo)
+            Задача: \(task.todo ?? "без названия")
             
             Описание:
-            \(task.taskDescription)
+            \(task.taskDescription ?? "Без описания")
             """
         
         let activityViewController = UIActivityViewController(

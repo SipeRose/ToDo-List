@@ -14,8 +14,9 @@ class TableViewCell: UITableViewCell {
             changeCheckmarkButtonImage()
         }
     }
-    var id: String!
     weak var ownerTableView: UITableView!
+    
+    var toDoItem: ToDoDataItem!
 
     var checkMarkButton: UIButton!
     var titleLabel: UILabel!
@@ -47,23 +48,18 @@ extension TableViewCell {
     
     @objc fileprivate func pressCheckMarkButton(sender: UIButton!) {
         taskDone = !taskDone
-        changeCheckmarkButtonImage()
         
-        for (index, toDo) in currentToDos.enumerated() {
-            if toDo.id == id {
-                currentToDos[index].completed = taskDone
-                break
-            }
-        }
+        guard let viewController = ownerTableView.delegate as? MainViewController else { return }
+        viewController.presenter.interactor.updateToDoData(
+            toDoItem: toDoItem,
+            completed: taskDone,
+            taskDescription: nil
+        )
         
-        for (index, toDo) in currentToDosCopy.enumerated() {
-            if toDo.id == id {
-                currentToDosCopy[index].completed = taskDone
-                break
-            }
+        DispatchQueue.main.async {
+            self.changeCheckmarkButtonImage()
+            self.ownerTableView.reloadData()
         }
-
-        ownerTableView.reloadData()
     }
     
     fileprivate func changeCheckmarkButtonImage() {

@@ -19,7 +19,6 @@ class TaskViewController: UIViewController, TaskViewProtocol {
     
     var dateLabel: UILabel!
     var textView: UITextView!
-    var taskId: String!
     var date: String!
     var taskDescription: String!
     
