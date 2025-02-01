@@ -7,6 +7,9 @@
 
 import UIKit
 
+// MARK: TableViewCell
+// Class with custom cell of TableView for making methods for interaction with user and Data like press Checkmark-button or edit some data in task
+
 class TableViewCell: UITableViewCell {
     
     var taskDone = false {
