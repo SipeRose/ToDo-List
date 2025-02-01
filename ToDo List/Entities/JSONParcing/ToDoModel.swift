@@ -11,3 +11,7 @@ struct ToDoJSONModel: Codable {
     var todo: String
     var completed: Bool
 }
+
+struct ToDos: Codable {
+    var todos: [ToDoJSONModel]
+}

@@ -20,13 +20,15 @@ class MainRouter: MainRouterProtocol {
     
     func openTheTaskView(with task: ToDoDataItem, from cell: TableViewCell) {
         if let vc = viewController.storyboard?.instantiateViewController(withIdentifier: "TaskView") as? TaskViewController {
-            vc.navigationItem.title = task.todo
+            
+            vc.toDoItem = task
             vc.date = task.date
+            vc.initialCell = cell
+            vc.navigationItem.title = task.todo
             vc.taskDescription = task.taskDescription
             vc.context = (viewController.presenter.interactor as? MainInteractor)?.context
-            vc.toDoItem = task
-            vc.initialCell = cell
             viewController.navigationController?.pushViewController(vc, animated: true)
+            
         }
     }
     

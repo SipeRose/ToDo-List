@@ -8,7 +8,11 @@
 import CoreData
 
 protocol TaskInteractorProtocol {
-    func saveToDoChanges(taskDescription: String, context: NSManagedObjectContext, toDoItem: ToDoDataItem)
+    func saveToDoChanges(
+        taskDescription: String,
+        context: NSManagedObjectContext,
+        toDoItem: ToDoDataItem
+    )
 }
 
 
@@ -26,7 +30,7 @@ class TaskInteractor: TaskInteractorProtocol {
         do {
             try context.save()
         } catch {
-            
+            print("Problems while saving changes")
         }
         
     }

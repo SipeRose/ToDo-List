@@ -8,9 +8,7 @@
 import UIKit
 
 protocol MainViewProtocol: AnyObject {
-    
     var tableView: UITableView! { get set }
-    
     func addTitle()
     func addBackground()
     func addSearchBar()
@@ -31,60 +29,11 @@ class MainViewController: UIViewController, MainViewProtocol {
         presenter.configureView()
     }
     
-    func addTitle() {
-        title = "Задачи"
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationController?.navigationBar.largeTitleTextAttributes = [
-            NSAttributedString.Key.foregroundColor: UIColor.white
-        ]
-    }
-    
-    func addBackground() {
-        view.backgroundColor = UIColor.black
-    }
-    
-    func addSearchBar() {
-        
-        searchBar = UISearchBar()
-        searchBar.delegate = self
-        
-        view.addSubview(searchBar)
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            searchBar.topAnchor.constraint(equalTo: navigationItem.titleView?.bottomAnchor ?? view.safeAreaLayoutGuide.topAnchor)
-        ])
-        
-        searchBar.barTintColor = .black
-        searchBar.barStyle = .black
-        searchBar.searchTextField.textColor = .white
-        searchBar.placeholder = "Search"
-        
-    }
-    
-    func addTableView() {
-        tableView = UITableView()
-        tableView.register(TableViewCell.self, forCellReuseIdentifier: "ToDoCell")
-        tableView.delegate = self
-        tableView.dataSource = self
-        
-        view.addSubview(tableView)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 16),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        tableView.backgroundColor = .clear
-    }
-    
 }
 
-
+// MARK: Search the task
 extension MainViewController: UISearchBarDelegate {
-    
+
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         
         DispatchQueue.global(qos: .userInitiated).async {
@@ -98,10 +47,13 @@ extension MainViewController: UISearchBarDelegate {
                 self?.tableView.reloadData()
             }
         }
+        
     }
 
 }
 
+
+// MARK: Working with TableView
 extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -118,19 +70,22 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         cell.selectionStyle = .none
-        
+        cell.ownerTableView = tableView
         cell.toDoItem = currentToDos[indexPath.row]
-        cell.titleLabel.text = currentToDos[indexPath.row].todo
-        cell.descriptionLabel.text = currentToDos[indexPath.row].taskDescription
         cell.taskDone = currentToDos[indexPath.row].completed
         cell.dateLabel.text = currentToDos[indexPath.row].date
-        cell.ownerTableView = tableView
+        cell.titleLabel.text = currentToDos[indexPath.row].todo
+        cell.descriptionLabel.text = currentToDos[indexPath.row].taskDescription
         
         return cell
+        
     }
     
+// MARK: Context Menu
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        
         return UIContextMenuConfiguration(
+            
             identifier: nil,
             previewProvider: nil,
             actionProvider: { suggestedActions in
@@ -168,7 +123,67 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                 
                 return UIMenu(title: "", children: [edit, share, delete])
             }
+            
         )
     }
     
+}
+
+// MARK: View's UI
+extension MainViewController {
+    
+    func addBackground() {
+        view.backgroundColor = UIColor.black
+    }
+    
+    func addTitle() {
+        
+        title = "Задачи"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationBar.largeTitleTextAttributes = [
+            NSAttributedString.Key.foregroundColor: UIColor.white
+        ]
+        
+    }
+    
+    func addSearchBar() {
+        
+        searchBar = UISearchBar()
+        searchBar.delegate = self
+        
+        view.addSubview(searchBar)
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            searchBar.topAnchor.constraint(
+                equalTo: navigationItem.titleView?.bottomAnchor ?? view.safeAreaLayoutGuide.topAnchor
+            )
+        ])
+        
+        searchBar.barTintColor = .black
+        searchBar.barStyle = .black
+        searchBar.searchTextField.textColor = .white
+        searchBar.placeholder = "Search"
+        
+    }
+    
+    func addTableView() {
+        
+        tableView = UITableView()
+        tableView.register(TableViewCell.self, forCellReuseIdentifier: "ToDoCell")
+        tableView.delegate = self
+        tableView.dataSource = self
+        
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 16),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        tableView.backgroundColor = .clear
+        
+    }
 }

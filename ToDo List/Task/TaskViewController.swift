@@ -34,7 +34,7 @@ class TaskViewController: UIViewController, TaskViewProtocol {
         configurator.configure(with: self)
         presenter.configureView()
         
-        
+// Observer for saving changes during exit to background
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(saveBeforeExit),
@@ -58,7 +58,6 @@ class TaskViewController: UIViewController, TaskViewProtocol {
     
     @objc private func saveBeforeExit() {
         saveTextViewText(textView.text ?? "")
-        print(555)
     }
     
     private func saveTextViewText(_ taskDescription: String) {

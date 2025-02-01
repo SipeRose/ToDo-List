@@ -35,11 +35,14 @@ class TaskPresenter: TaskPresenterProtocol {
     }
     
     private func addGestureRecognizerForHideKeyboard() {
+        
         guard let view = taskView as? TaskViewController else { return }
+        
         let tapGestureRecognizer = UITapGestureRecognizer(
             target: view.textView,
             action: #selector(view.textView.endEditing)
         )
+        
         let swipeGestureRecognizer = UISwipeGestureRecognizer(
             target: view.view,
             action: #selector(view.view.endEditing)
@@ -48,9 +51,12 @@ class TaskPresenter: TaskPresenterProtocol {
         
         view.view.addGestureRecognizer(tapGestureRecognizer)
         view.view.addGestureRecognizer(swipeGestureRecognizer)
+        
     }
-    
+
+// MARK: Notifications for Keyboard while working with TextView
     private func notificationCenterObserversForKeyBoard() {
+        
         let notificationenter = NotificationCenter.default
         notificationenter.addObserver(
             self,
@@ -64,6 +70,7 @@ class TaskPresenter: TaskPresenterProtocol {
             name: UIResponder.keyboardWillChangeFrameNotification,
             object: nil
         )
+        
     }
     
     @objc private func adjustForKeyboard(notification: Notification) {

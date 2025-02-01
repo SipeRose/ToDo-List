@@ -62,6 +62,7 @@ class MainPresenter: MainPresenterProtocol {
     }
     
     private func addToolBarItems(with countOfTasks: Int = 0) {
+        
         let writeToDoButton = UIBarButtonItem(
             image: UIImage(systemName: "square.and.pencil"),
             style: .plain,
@@ -69,11 +70,13 @@ class MainPresenter: MainPresenterProtocol {
             action: #selector(addNewTask)
         )
         writeToDoButton.tintColor = UIColor.systemYellow
+        
         let spacer = UIBarButtonItem(
             barButtonSystemItem: .flexibleSpace,
             target: nil,
             action: nil
         )
+        
         let countOfTaskslabel = UILabel()
         countOfTaskslabel.textColor = .white
         countOfTaskslabel.textAlignment = .center
@@ -87,9 +90,11 @@ class MainPresenter: MainPresenterProtocol {
         view.navigationController?.isToolbarHidden = false
         view.navigationController?.toolbar.isTranslucent = false
         view.navigationController?.toolbar.barStyle = .black
+        
     }
     
     @objc private func addNewTask() {
+        
         guard let viewController = view as? MainViewController else { return }
         
         let alertController = UIAlertController(

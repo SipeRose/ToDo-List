@@ -12,14 +12,12 @@ import UIKit
 
 class TableViewCell: UITableViewCell {
     
-    var taskDone = false {
-        didSet {
-            changeCheckmarkButtonImage()
-        }
-    }
     weak var ownerTableView: UITableView!
-    
     var toDoItem: ToDoDataItem!
+    
+    var taskDone = false {
+        didSet { changeCheckmarkButtonImage() }
+    }
 
     var checkMarkButton: UIButton!
     var titleLabel: UILabel!
@@ -46,10 +44,14 @@ class TableViewCell: UITableViewCell {
 }
 
 
-// MARK: Checkmark Methods
+// MARK: Methods called by pressing Checkmark:
+// * Updating Data in CoreData
+// * Changing image of checkmark-button
+// * Crossing (and cancellation of crossing) the title of task and changing its' color
 extension TableViewCell {
     
     @objc fileprivate func pressCheckMarkButton(sender: UIButton!) {
+        
         taskDone = !taskDone
         
         guard let viewController = ownerTableView.delegate as? MainViewController else { return }
@@ -63,28 +65,25 @@ extension TableViewCell {
             self.changeCheckmarkButtonImage()
             self.ownerTableView.reloadData()
         }
+        
     }
     
     fileprivate func changeCheckmarkButtonImage() {
         
         if taskDone {
-            self.checkMarkButton.setImage(
-                UIImage(systemName: "checkmark.circle"),
-                for: .normal
-            )
+            self.checkMarkButton.setImage(UIImage(systemName: "checkmark.circle"), for: .normal)
             self.checkMarkButton.tintColor = .systemYellow
             crossTitleAndDescriptionText()
         } else {
-            self.checkMarkButton.setImage(
-                UIImage(systemName: "circle"),
-                for: .normal
-            )
+            self.checkMarkButton.setImage(UIImage(systemName: "circle"), for: .normal)
             self.checkMarkButton.tintColor = .systemGray
             cancelCrossTitleText()
         }
+        
     }
     
     private func crossTitleAndDescriptionText() {
+        
         guard let titleText = titleLabel.text else { return }
         var attributedString = NSMutableAttributedString(string: titleText)
         attributedString.addAttribute(
@@ -107,9 +106,11 @@ extension TableViewCell {
             range: NSRange(location: 0, length: attributedString.length)
         )
         descriptionLabel.attributedText = attributedString
+        
     }
     
     private func cancelCrossTitleText() {
+        
         guard let titleText = titleLabel.text else { return }
         var attrbutedString = NSMutableAttributedString(string: titleText)
         attrbutedString.addAttribute(
@@ -132,6 +133,7 @@ extension TableViewCell {
             range: NSRange(location: 0, length: attrbutedString.length)
         )
         descriptionLabel.attributedText = attrbutedString
+        
     }
     
 }
@@ -185,11 +187,12 @@ extension TableViewCell {
 }
 
 
-// MARK: Layout
+// MARK: Layout of Cell's UI
 
 extension TableViewCell {
     
     fileprivate func configureConstraints() {
+        
         NSLayoutConstraint.activate([
             checkMarkButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             checkMarkButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
@@ -207,6 +210,7 @@ extension TableViewCell {
             dateLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 6),
             dateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
         ])
+        
     }
     
 }

@@ -14,6 +14,7 @@ protocol MainConfiguratorProtocol {
 class MainConfigurator: MainConfiguratorProtocol {
     
     func configure(with viewController: MainViewController) {
+        
         let presenter = MainPresenter(view: viewController)
         let interactor = MainInteractor(presenter: presenter)
         let router = MainRouter(viewController: viewController)

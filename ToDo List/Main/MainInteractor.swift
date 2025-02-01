@@ -26,50 +26,6 @@ class MainInteractor: MainInteractorProtocol {
         context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext
     }
     
-    func parseJSON() async throws {
-        let urlString = "https://dummyjson.com/todos"
-        
-        guard let url = URL(string: urlString) else { throw requestError.invalidURL }
-        
-        let (data, response) = try await {
-            let request = URLRequest(url: url, timeoutInterval: 60.0)
-            return try await URLSession.shared.data(for: request)
-        }()
-        
-        guard let response = response as? HTTPURLResponse,
-              response.statusCode == 200 else { throw requestError.invalidResponse }
-        
-        do {
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(ToDos.self, from: data)
-            
-            for todo in result.todos {
-                
-                let title = todo.todo
-                let description = ""
-                let completed = todo.completed
-                
-                _ = createNewToDoData(
-                    date: "02/10/24",
-                    todo: title,
-                    taskDescription: description,
-                    completed: completed
-                )
-                
-            }
-            
-            saveFirstParse()
-            
-            DispatchQueue.main.async { [weak self] in
-                self?.presenter.reloadTableViewData()
-                self?.presenter.updateTasksCount(to: currentToDos.count)
-            }
-            
-        } catch {
-            throw requestError.invalidData
-        }
-    }
-    
     func addNemTask(title: String, description: String) {
 
         let date = getStringDate()
@@ -90,18 +46,21 @@ class MainInteractor: MainInteractorProtocol {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.presenter.insertNewRowToTableView()
         }
+        
     }
     
     private func getStringDate() -> String {
         let date = Date()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd/MM/YY"
+        
         return dateFormatter.string(from: date)
     }
     
-    // MARK: Core Data
+// MARK: Core Data
     
     func getAllDataFromCoreData() {
+        
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 if let toDoData = try self.context?.fetch(ToDoDataItem.fetchRequest()) {
@@ -112,9 +71,11 @@ class MainInteractor: MainInteractorProtocol {
                 
             }
         }
+        
     }
     
     func createNewToDoData(date: String, todo: String, taskDescription: String, completed: Bool) -> ToDoDataItem {
+        
         guard let context = context else { fatalError() }
         let newTask = ToDoDataItem(context: context)
         
@@ -127,21 +88,23 @@ class MainInteractor: MainInteractorProtocol {
             try context.save()
             getAllDataFromCoreData()
         } catch {
-            print("Не удалось созранить ничего")
+            print("Problems while saving")
         }
         
         return newTask
     }
     
     func deleteToDoData(data object: ToDoDataItem) {
+        
         guard let context = context else { return }
         context.delete(object)
         
         do {
             try context.save()
         } catch {
-            print("Не удалось сохранить")
+            print("Problems while deleting")
         }
+        
     }
     
     func updateToDoData(toDoItem: ToDoDataItem, completed: Bool?, taskDescription: String?) {
@@ -159,8 +122,54 @@ class MainInteractor: MainInteractorProtocol {
         do {
             try context.save()
         } catch {
-            
+            print("Problems while updating")
         }
     }
+    
+    
+// MARK: First task we are getting from API
+        func parseJSON() async throws {
+            let urlString = "https://dummyjson.com/todos"
+            
+            guard let url = URL(string: urlString) else { throw requestError.invalidURL }
+            
+            let (data, response) = try await {
+                let request = URLRequest(url: url, timeoutInterval: 60.0)
+                return try await URLSession.shared.data(for: request)
+            }()
+            
+            guard let response = response as? HTTPURLResponse,
+                  response.statusCode == 200 else { throw requestError.invalidResponse }
+            
+            do {
+                let decoder = JSONDecoder()
+                let result = try decoder.decode(ToDos.self, from: data)
+                
+                for todo in result.todos {
+                    
+                    let title = todo.todo
+                    let description = ""
+                    let completed = todo.completed
+                    
+                    _ = createNewToDoData(
+                        date: "02/10/24",
+                        todo: title,
+                        taskDescription: description,
+                        completed: completed
+                    )
+                    
+                }
+                
+                saveFirstParse()
+                
+                DispatchQueue.main.async { [weak self] in
+                    self?.presenter.reloadTableViewData()
+                    self?.presenter.updateTasksCount(to: currentToDos.count)
+                }
+                
+            } catch {
+                throw requestError.invalidData
+            }
+        }
 
 }
